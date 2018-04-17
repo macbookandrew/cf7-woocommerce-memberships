@@ -46,6 +46,9 @@ class CF7_Woo_Memberships {
 		add_action( 'plugins_loaded', array( $this, 'load' ) );
 	}
 
+	/**
+	 * Check if required plugins are active and if so, load everything
+	 */
 	function load() {
 		if ( class_exists( 'WPCF7' ) || class_exists( 'WC_Memberships' ) ) {
 			add_action( 'wpcf7_add_meta_boxes', array( $this, 'register_metabox' ) );
