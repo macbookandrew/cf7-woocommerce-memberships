@@ -209,6 +209,7 @@ class CF7_Woo_Memberships {
 	 */
 	private function get_form_settings( $form_id ) {
 		$this->form_settings = maybe_unserialize( get_post_meta( $form_id, '_cf7_woo_memberships', true ) );
+		return $this->form_settings;
 	}
 
 	/**
