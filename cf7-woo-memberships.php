@@ -16,6 +16,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-if ( is_plugin_active( 'contact-form-7/wp-contact-form-7.php' ) && is_plugin_active( 'woocommerce/woocommerce.php' ) && is_plugin_active( 'woocommerce-memberships/woocommerce-memberships.php' ) ) {
+if ( class_exists( 'WPCF7' ) && class_exists( 'WC_Memberships' ) ) {
 	include_once 'includes/class-cf7-woo-memberships.php';
 }
