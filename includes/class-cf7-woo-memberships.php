@@ -43,11 +43,30 @@ class CF7_Woo_Memberships {
 	 * @private
 	 */
 	function __construct() {
-		add_action( 'wpcf7_add_meta_boxes', array( $this, 'register_metabox' ) );
-		add_filter( 'wpcf7_editor_panels', array( $this, 'register_cf7_panel' ) );
+		add_action( 'plugins_loaded', array( $this, 'load' ) );
+	}
 
-		add_action( 'wpcf7_save_contact_form', array( $this, 'save_contact_form' ), 10, 3 );
-		add_action( 'wpcf7_before_send_mail', array( $this, 'generate_membership' ), 10, 1 );
+	function load() {
+		if ( class_exists( 'WPCF7' ) || class_exists( 'WC_Memberships' ) ) {
+			add_action( 'wpcf7_add_meta_boxes', array( $this, 'register_metabox' ) );
+			add_filter( 'wpcf7_editor_panels', array( $this, 'register_cf7_panel' ) );
+
+			add_action( 'wpcf7_save_contact_form', array( $this, 'save_contact_form' ), 10, 3 );
+			add_action( 'wpcf7_before_send_mail', array( $this, 'generate_membership' ), 10, 1 );
+
+			add_action( 'plugins_loaded', array( $this, 'load_plugin' ) );
+		} else {
+			add_action( 'admin_notices', array( $this, 'add_dependencies_notice' ) );
+		}
+	}
+
+	/**
+	 * Add plugin dependencies notice
+	 */
+	public function add_dependencies_notice() {
+		echo '<div class="notice notice-error">
+			<p><strong>Contact Form 7 → WooCommerce Memberships</strong> cannot run because Contact Form 7 and/or WooCommerce Memberships is not active. Please activate both plugins to dismiss this notice.</p>
+		</div>';
 	}
 
 	/**

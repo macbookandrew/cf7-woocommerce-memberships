@@ -16,6 +16,4 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-if ( class_exists( 'WPCF7' ) && class_exists( 'WC_Memberships' ) ) {
-	include_once 'includes/class-cf7-woo-memberships.php';
-}
+include_once 'includes/class-cf7-woo-memberships.php';
