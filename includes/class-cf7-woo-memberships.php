@@ -192,11 +192,11 @@ class CF7_Woo_Memberships {
 		$this->form_settings = maybe_unserialize( get_post_meta( $form_id, '_cf7_woo_memberships', true ) );
 	}
 
-		/**
-		 * Build <options> list of all membership plans
-		 *
-		 * @return string HTML <options>
-		 */
+	/**
+	 * Build <options> list of all membership plans
+	 *
+	 * @return string HTML <options>
+	 */
 	private function get_membership_plans_options() {
 		$plans_options = '<option value="">&mdash; Select One or Choose a Field Below&mdash;</option>';
 
