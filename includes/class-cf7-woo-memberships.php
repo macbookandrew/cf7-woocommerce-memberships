@@ -255,29 +255,44 @@ class CF7_Woo_Memberships {
 		}
 		$form_settings = $this->get_form_settings( $posted_data['_wpcf7'] );
 
-		// Get user data.
-		if ( is_user_logged_in() ) {
-			$user_id = get_current_user_id();
-		} else {
-			foreach ( $form_settings['fields'] as $user_field => $submission_field ) {
-				$user_data[ $user_field ] = esc_attr( $posted_data[ $submission_field ] );
+		if ( ! empty( $form_settings ) ) {
+			// Get user data.
+			if ( is_user_logged_in() ) {
+				$user_id = get_current_user_id();
+			} else {
+				$get_by_email = get_user_by( 'email', $posted_data[ $form_settings['fields']['email-address'] ] );
+				if ( ! empty( $get_by_email ) ) {
+					$user_id = $get_by_email->ID;
+				} else {
+					foreach ( $form_settings['fields'] as $user_field => $submission_field ) {
+						$user_data[ $user_field ] = esc_attr( $posted_data[ $submission_field ] );
+					}
+
+					$user_args = array(
+						'user_login' => $user_data['email-address'],
+						'first_name' => $user_data['first-name'],
+						'last_name'  => $user_data['last-name'],
+						'user_email' => $user_data['email-address'],
+					);
+
+					$user_id = wp_insert_user( $user_args );
+				}
 			}
 
-			$user_id = wp_insert_user(
-				array(
-					'first_name' => $user_data['first-name'],
-					'last_name'  => $user_data['last-name'],
-					'user_email' => $user_data['email-address'],
-				)
+			$membership_data = array(
+				'plan_id' => $form_settings['membership-id'],
+				'user_id' => $user_id,
 			);
-		}
 
-		// Create membership.
-		$membership_data = array(
-			'plan_id' => $form_settings['membership-id'],
-			'user_id' => $user_id,
-		);
-		return wc_memberships_create_user_membership( $membership_data );
+			$existing_membership = wc_memberships_get_user_membership( $membership_data['user_id'], $membership_data['plan_id'] );
+
+			// Check for an existing membership.
+			if ( isset( $existing_membership->id ) ) {
+				return true;
+			} else {
+				return wc_memberships_create_user_membership( $membership_data );
+			}
+		}
 	}
 
 }
