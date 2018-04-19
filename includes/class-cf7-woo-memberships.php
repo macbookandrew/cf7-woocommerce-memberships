@@ -329,11 +329,11 @@ class CF7_Woo_Memberships {
 			if ( is_user_logged_in() ) {
 				$user_id = get_current_user_id();
 			} else {
-				$get_by_email = get_user_by( 'email', $posted_data[ $form_settings['fields']['email-address'] ] );
+				$get_by_email = get_user_by( 'email', $posted_data[ array_flip( $form_settings['fields'] )['email-address'] ] );
 				if ( ! empty( $get_by_email ) ) {
 					$user_id = $get_by_email->ID;
 				} else {
-					foreach ( $form_settings['fields'] as $user_field => $submission_field ) {
+					foreach ( $form_settings['fields'] as $submission_field => $user_field ) {
 						$user_data[ $user_field ] = esc_attr( $posted_data[ $submission_field ] );
 					}
 
