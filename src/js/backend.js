@@ -7,7 +7,7 @@
 ( function( $ ) {
 	$( document ).ready( function() {
 		// Hide all fields if form ignored.
-		$( 'input[name="cf7-woocommerce-memberships[ignore-form]"]:checked' ).on( 'change', function() {
+		$( 'input[name="cf7-woocommerce-memberships[ignore-form]"]' ).on( 'change', function() {
 			hideOtherFields();
 		});
 		hideOtherFields();
