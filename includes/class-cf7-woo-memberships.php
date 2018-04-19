@@ -329,7 +329,8 @@ class CF7_Woo_Memberships {
 			if ( is_user_logged_in() ) {
 				$user_id = get_current_user_id();
 			} else {
-				$get_by_email = get_user_by( 'email', $posted_data[ array_flip( $form_settings['fields'] )['email-address'] ] );
+				$form_fields = array_flip( $form_settings['fields'] );
+				$get_by_email = get_user_by( 'email', $posted_data[ $form_fields['email-address'] ] );
 				if ( ! empty( $get_by_email ) ) {
 					$user_id = $get_by_email->ID;
 				} else {
