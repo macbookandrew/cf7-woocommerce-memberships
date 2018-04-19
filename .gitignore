@@ -1,4 +1,5 @@
 .DS_Store
+dist/
 phpcs.xml
 phpunit.xml
 Thumbs.db

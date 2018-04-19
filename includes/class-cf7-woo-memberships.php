@@ -19,6 +19,13 @@ if ( ! defined( 'ABSPATH' ) ) {
  */
 class CF7_Woo_Memberships {
 	/**
+	 * Plugin version
+	 *
+	 * @var string
+	 */
+	private $version = '1.2.0';
+
+	/**
 	 * Data fields
 	 *
 	 * @var array
@@ -42,14 +49,14 @@ class CF7_Woo_Memberships {
 	 *
 	 * @private
 	 */
-	function __construct() {
+	public function __construct() {
 		add_action( 'plugins_loaded', array( $this, 'load' ) );
 	}
 
 	/**
 	 * Check if required plugins are active and if so, load everything
 	 */
-	function load() {
+	public function load() {
 		if ( class_exists( 'WPCF7' ) || class_exists( 'WC_Memberships' ) ) {
 			add_action( 'wpcf7_add_meta_boxes', array( $this, 'register_metabox' ) );
 			add_filter( 'wpcf7_editor_panels', array( $this, 'register_cf7_panel' ) );
@@ -58,6 +65,8 @@ class CF7_Woo_Memberships {
 			add_action( 'wpcf7_before_send_mail', array( $this, 'generate_membership' ), 10, 1 );
 
 			add_action( 'plugins_loaded', array( $this, 'load_plugin' ) );
+
+			add_action( 'admin_enqueue_scripts', array( $this, 'register_admin_assets' ) );
 		} else {
 			add_action( 'admin_notices', array( $this, 'add_dependencies_notice' ) );
 		}
@@ -70,6 +79,13 @@ class CF7_Woo_Memberships {
 		echo '<div class="notice notice-error">
 			<p><strong>Contact Form 7 → WooCommerce Memberships</strong> cannot run because Contact Form 7 and/or WooCommerce Memberships is not active. Please activate both plugins to dismiss this notice.</p>
 		</div>';
+	}
+
+	/**
+	 * Register admin assets
+	 */
+	public function register_admin_assets() {
+		wp_register_script( 'cf7-woocommerce-memberships', plugin_dir_url( __FILE__ ) . '../dist/js/backend.min.js', array( 'jquery' ), $this->version, true );
 	}
 
 	/**
@@ -109,21 +125,66 @@ class CF7_Woo_Memberships {
 	 * @param object $contact_form WPCF7_ContactForm object for the current form.
 	 */
 	public function print_metabox( $contact_form ) {
+		wp_enqueue_script( 'cf7-woocommerce-memberships' );
+
 		if ( empty( $this->form_settings ) ) {
 			$this->get_form_settings( $contact_form->id() );
 		}
 
 		$rows = array();
 
+		$common_attributes = array(
+			'class' => array(),
+		);
+
+		$input_attributes = array(
+			'checked' => array( 'checked' ),
+			'class'   => array(),
+			'name'    => array(),
+			'type'    => array( 'checkbox', 'text', 'value' ),
+		);
+
+		$form_elements = array(
+			'p'      => array(),
+			'table'  => array(),
+			'tr'     => $common_attributes,
+			'th'     => array( 'colspan' => array() ),
+			'td'     => array( 'colspan' => array() ),
+			'label'  => array( 'for' ),
+			'input'  => $input_attributes,
+			'select' => $input_attributes,
+			'option' => array(
+				'selected' => array(),
+				'value'    => array(),
+			),
+		);
+
 		// Get all WPCF7 fields.
 		$wpcf7_form_tags       = WPCF7_FormTagsManager::get_instance();
 		$field_types_to_ignore = array( 'recaptcha', 'clear', 'submit' );
 		$form_fields           = array();
 		foreach ( $wpcf7_form_tags->get_scanned_tags() as $this_field ) {
-			if ( ! in_array( $this_field['type'], $field_types_to_ignore ) ) {
+			if ( ! in_array( $this_field['type'], $field_types_to_ignore, true ) ) {
 				$form_fields[] = $this_field['name'];
 			}
 		}
+
+		// Add one row for an ignore checkbox.
+		$rows[] = sprintf(
+			'<tr class="cf7-woocommerce-memberships-field-%1$s">
+				<th>
+					<label for="cf7-woocommerce-memberships[%1$s]">%2$s</label><br/>
+				</th>
+				<td><input type="checkbox" name="cf7-woocommerce-memberships[%1$s]" value="true" ' . checked( $this->form_settings['ignore-form'], true, false ) . '></td>
+			</tr>',
+			'ignore-form',
+			'Ignore this form'
+		);
+
+		// Add one row for instructions.
+		$rows[] = '<tr class="cf7-woocommerce-memberships-field-instructions">
+				<td colspan="2">Choose a membership plan and  which fields contain the user’s information:</td>
+			</tr>';
 
 		// Add one row for the membership ID.
 		$rows[] = sprintf(
@@ -153,13 +214,13 @@ class CF7_Woo_Memberships {
 		}
 
 		// Output fields list.
-		printf(
+		printf( // WPCS: XSS ok.
 			'<p class="cf7-woocommerce-memberships-message"></p>
-			<p>Choose which fields contain user information:</p>
 			<table class="form-table cf7-woocommerce-memberships-table">
 				%1$s
-			</table>',
-			implode( '', $rows )
+			</table>%2$s',
+			wp_kses( implode( '', $rows ), $form_elements ),
+			wp_nonce_field( '_cf7wcm_data', 'cf7-woocommerce-memberships-nonce', true, false )
 		);
 
 	}
@@ -173,7 +234,7 @@ class CF7_Woo_Memberships {
 	 * @return boolean Whether post meta was updated or not.
 	 */
 	public function save_contact_form( $contact_form, $args, $context ) {
-		if ( ! isset( $_POST ) || ! array_key_exists( 'cf7-woocommerce-memberships', $_POST ) ) {
+		if ( ! isset( $_POST ) || ! wp_verify_nonce( $_POST['cf7-woocommerce-memberships-nonce'], '_cf7wcm_data' ) || ! array_key_exists( 'cf7-woocommerce-memberships', $_POST ) ) { // WPCS: input var ok.
 			return;
 		}
 
@@ -183,22 +244,27 @@ class CF7_Woo_Memberships {
 			return;
 		}
 
-		if ( isset( $_POST['cf7-woocommerce-memberships'] ) ) {
+		if ( isset( $_POST['cf7-woocommerce-memberships'] ) ) { // WPCS: input var ok.
 			$form_settings = array();
 
-			foreach ( $_POST['cf7-woocommerce-memberships']['fields'] as $data_field => $cf7_field ) {
-				if ( in_array( $cf7_field, array_keys( $this->data_fields ) ) ) {
-					if ( 'membership-id' === $data_field ) {
-						$form_settings['membership-id'] = esc_attr( $cf7_field );
-					} else {
-						$form_settings['fields'][ $data_field ] = esc_attr( $cf7_field );
+			// Set ignore option.
+			if ( 'true' === esc_attr( $_POST['cf7-woocommerce-memberships']['ignore-form'] ) ) { // WPCS: XSS ok.
+				$form_settings['ignore-form'] = true;
+			} else {
+				foreach ( $_POST['cf7-woocommerce-memberships']['fields'] as $data_field => $cf7_field ) {
+					if ( in_array( $cf7_field, array_keys( $this->data_fields ), true ) ) {
+						if ( 'membership-id' === $data_field ) {
+							$form_settings['membership-id'] = esc_attr( $cf7_field );
+						} else {
+							$form_settings['fields'][ $data_field ] = esc_attr( $cf7_field );
+						}
 					}
 				}
-			}
 
-			// Set Membership ID if not set by a specific field.
-			if ( ! isset( $form_settings['membership-id'] ) ) {
-				$form_settings['membership-id'] = esc_attr( $_POST['cf7-woocommerce-memberships']['membership-id'] );
+				// Set Membership ID if not set by a specific field.
+				if ( ! isset( $form_settings['membership-id'] ) ) {
+					$form_settings['membership-id'] = esc_attr( $_POST['cf7-woocommerce-memberships']['membership-id'] );
+				}
 			}
 
 			return update_post_meta( $post_id, '_cf7_woo_memberships', maybe_serialize( $form_settings ) );
@@ -258,7 +324,7 @@ class CF7_Woo_Memberships {
 		}
 		$form_settings = $this->get_form_settings( $posted_data['_wpcf7'] );
 
-		if ( ! empty( $form_settings ) ) {
+		if ( ! empty( $form_settings ) && true !== $form_settings['ignore-form'] && ! empty( $form_settings['membership-id'] ) ) {
 			// Get user data.
 			if ( is_user_logged_in() ) {
 				$user_id = get_current_user_id();

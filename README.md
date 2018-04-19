@@ -4,7 +4,7 @@
 **Tags:** comments, spam  
 **Requires at least:** 4.4  
 **Tested up to:** 4.9.5  
-**Stable tag:** 1.1.0  
+**Stable tag:** 1.2.0  
 **License:** GPLv2 or later  
 **License URI:** https://www.gnu.org/licenses/gpl-2.0.html  
 
@@ -21,6 +21,9 @@ Adds Contact Form 7 entries as new users (if necessary) and grants them the spec
 1. Edit your contact forms to choose the membership ID and match up the correct fields
 
 ## Changelog ##
+
+### 1.2.0 ###
+* Add support for specifically ignoring a form
 
 ### 1.1.0 ###
 * Check for an existing membership before creating one
