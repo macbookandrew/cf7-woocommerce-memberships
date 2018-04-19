@@ -1,8 +1,14 @@
+/**
+ * Grunt build process
+ *
+ * @param {object} grunt grunt
+ * @package CF7_Woo_Memberships
+ */
+
 module.exports = function( grunt ) {
 
 	'use strict';
 
-	// Project configuration
 	grunt.initConfig( {
 
 		pkg: grunt.file.readJSON( 'package.json' ),
@@ -43,11 +49,21 @@ module.exports = function( grunt ) {
 				}
 			}
 		},
+
+		uglify: {
+			custom: {
+				files: {
+					'dist/js/backend.min.js': ['src/js/backend.js'],
+				},
+			},
+		},
+
 	} );
 
+	grunt.loadNpmTasks( 'grunt-contrib-uglify' );
 	grunt.loadNpmTasks( 'grunt-wp-i18n' );
 	grunt.loadNpmTasks( 'grunt-wp-readme-to-markdown' );
-	grunt.registerTask( 'default', [ 'i18n','readme' ] );
+	grunt.registerTask( 'default', [ 'i18n','readme','uglify' ] );
 	grunt.registerTask( 'i18n', ['addtextdomain', 'makepot'] );
 	grunt.registerTask( 'readme', ['wp_readme_to_markdown'] );
 
