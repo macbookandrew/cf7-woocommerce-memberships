@@ -267,7 +267,7 @@ class CF7_Woo_Memberships {
 			$form_settings = array();
 
 			// Set ignore option.
-			if ( 'true' === esc_attr( $_POST['cf7-woocommerce-memberships']['ignore-form'] ) ) { // WPCS: XSS ok.
+			if ( in_array( esc_attr( $_POST['cf7-woocommerce-memberships']['ignore-form'] ), array( 'on', 'true' ), true ) ) { // WPCS: XSS ok.
 				$form_settings['ignore-form'] = true;
 			} else {
 				foreach ( $_POST['cf7-woocommerce-memberships']['fields'] as $data_field => $cf7_field ) {
