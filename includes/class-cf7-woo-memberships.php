@@ -356,16 +356,23 @@ class CF7_Woo_Memberships {
 		}
 		$form_settings = $this->get_form_settings( $posted_data['_wpcf7'] );
 
+		// Continue if we have CF7-WCM settings.
 		if ( ! empty( $form_settings ) && true !== $form_settings['ignore-form'] && ! empty( $form_settings['membership-id'] ) ) {
-			// Get user data.
+			// Check to see if we need to create a user.
 			if ( is_user_logged_in() ) {
+				// User is logged in; we can use their account.
+				// FUTURE: update account with newly-submitted info?
 				$user_id = get_current_user_id();
 			} else {
+				// User is logged out; we should check to see if they have an account.
 				$form_fields  = array_flip( $form_settings['fields'] );
 				$get_by_email = get_user_by( 'email', $posted_data[ $form_fields['email-address'] ] );
 				if ( ! empty( $get_by_email ) ) {
+					// User has an account; we’ll use that account for the membership.
+					// FUTURE: update account with newly-submitted info?
 					$user_id = $get_by_email->ID;
 				} else {
+					// User does not have an account; we need to create one.
 					foreach ( $form_settings['fields'] as $submission_field => $user_field ) {
 						$user_data[ $user_field ] = esc_attr( $posted_data[ $submission_field ] );
 					}
@@ -381,6 +388,7 @@ class CF7_Woo_Memberships {
 				}
 			}
 
+			// Set up membership data.
 			$membership_data = array(
 				'plan_id' => $form_settings['membership-id'],
 				'user_id' => $user_id,
@@ -394,6 +402,7 @@ class CF7_Woo_Memberships {
 				// Set the membership status.
 				add_filter( 'wc_memberships_new_membership_data', array( $this, 'set_membership_status' ) );
 
+				// Create the new membership.
 				return wc_memberships_create_user_membership( $membership_data );
 			}
 		}
