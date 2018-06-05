@@ -311,9 +311,15 @@ class CF7_Woo_Memberships {
 	private function get_membership_plans_options() {
 		$plans_options = '<option value="">&mdash; Select One or Choose a Field Below&mdash;</option>';
 
+		if ( array_key_exists( 'membership-id', $this->form_settings ) ) {
+			$membership_id = $this->form_settings['membership-id'];
+		} else {
+			$membership_id = null;
+		}
+
 		$membership_plans = new WC_Memberships_Membership_Plans();
 		foreach ( $membership_plans->get_membership_plans() as $plan ) {
-			$plans_options .= '<option value="' . $plan->id . '"' . selected( $this->form_settings['membership-id'], $plan->id, false ) . '>' . $plan->name . '</option>';
+			$plans_options .= '<option value="' . $plan->id . '"' . selected( $membership_id, $plan->id, false ) . '>' . $plan->name . '</option>';
 		}
 
 		return $plans_options;
@@ -326,10 +332,17 @@ class CF7_Woo_Memberships {
 	 * @return string HTML <options>
 	 */
 	private function get_membership_plans_mode() {
-		$plan_mode   = '';
+		$plan_mode = '';
+
+		if ( array_key_exists( 'membership-mode', $this->form_settings ) ) {
+			$membership_mode = $this->form_settings['membership-mode'];
+		} else {
+			$membership_mode = null;
+		}
+
 		$memberships = new WC_Memberships_User_Memberships();
 		foreach ( $memberships->get_user_membership_statuses() as $key => $value ) {
-			$plan_mode .= '<option value="' . $key . '"' . selected( $this->form_settings['membership-mode'], $key, false ) . '>' . $value['label'] . '</option>';
+			$plan_mode .= '<option value="' . $key . '"' . selected( $membership_mode, $key, false ) . '>' . $value['label'] . '</option>';
 		}
 
 		return $plan_mode;
@@ -342,7 +355,7 @@ class CF7_Woo_Memberships {
 	 * @return string HTML <options>
 	 */
 	private function get_data_fields_options( $field ) {
-		if ( array_key_exists( $field, $this->form_settings['fields'] ) ) {
+		if ( array_key_exists( 'fields', $this->form_settings ) && array_key_exists( $field, $this->form_settings['fields'] ) ) {
 			$form_field = $this->form_settings['fields'][ $field ];
 		} else {
 			$form_field = null;
