@@ -16,9 +16,13 @@ Adds Contact Form 7 entries as new users (if necessary) and grants them the spec
 
 == Installation ==
 
-1. Upload this plugin to the `/wp-content/plugins/` directory
-1. Activate the plugin through the “Plugins” menu in WordPress
-1. Edit your contact forms to choose the membership ID and mode and specify the user data fields
+1. Upload this plugin to the `/wp-content/plugins/` directory.
+1. Activate the plugin through the “Plugins” menu in WordPress.
+1. Edit your contact forms to choose the membership ID and mode and specify the user data fields.
+
+== Screenshots ==
+
+1. Contact Form settings
 
 == Changelog ==
 
