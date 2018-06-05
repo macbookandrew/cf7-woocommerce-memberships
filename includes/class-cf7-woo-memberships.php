@@ -169,13 +169,19 @@ class CF7_Woo_Memberships {
 			}
 		}
 
+		if ( array_key_exists( 'ignore-form', $this->form_settings ) ) {
+			$ignore_form = $this->form_settings['ignore-form'];
+		} else {
+			$ignore_form = null;
+		}
+
 		// Add one row for an ignore checkbox.
 		$rows[] = sprintf(
 			'<tr class="cf7-woocommerce-memberships-field-%1$s">
 				<th>
 					<label for="cf7-woocommerce-memberships[%1$s]">%2$s</label><br/>
 				</th>
-				<td><input type="checkbox" name="cf7-woocommerce-memberships[%1$s]" value="true" ' . checked( $this->form_settings['ignore-form'], true, false ) . '></td>
+				<td><input type="checkbox" name="cf7-woocommerce-memberships[%1$s]" value="true" ' . checked( $ignore_form, true, false ) . '></td>
 			</tr>',
 			'ignore-form',
 			'Ignore this form'
@@ -183,7 +189,7 @@ class CF7_Woo_Memberships {
 
 		// Add one row for instructions.
 		$rows[] = '<tr class="cf7-woocommerce-memberships-field-instructions">
-				<td colspan="2">Choose a membership plan and  which fields contain the user’s information:</td>
+				<td colspan="2">Choose a membership plan and mode, and assign the fields which contain user information:</td>
 			</tr>';
 
 		// Add one row for the membership ID.
@@ -320,7 +326,7 @@ class CF7_Woo_Memberships {
 	 * @return string HTML <options>
 	 */
 	private function get_membership_plans_mode() {
-		$plan_mode = '';
+		$plan_mode   = '';
 		$memberships = new WC_Memberships_User_Memberships();
 		foreach ( $memberships->get_user_membership_statuses() as $key => $value ) {
 			$plan_mode .= '<option value="' . $key . '"' . selected( $this->form_settings['membership-mode'], $key, false ) . '>' . $value['label'] . '</option>';
@@ -336,9 +342,15 @@ class CF7_Woo_Memberships {
 	 * @return string HTML <options>
 	 */
 	private function get_data_fields_options( $field ) {
+		if ( array_key_exists( $field, $this->form_settings['fields'] ) ) {
+			$form_field = $this->form_settings['fields'][ $field ];
+		} else {
+			$form_field = null;
+		}
+
 		$fields_options = '<option value="ignore">Ignore This Field</option>';
 		foreach ( $this->data_fields as $key => $value ) {
-			$fields_options .= '<option value="' . $key . '"' . selected( $this->form_settings['fields'][ $field ], $key, false ) . '>' . $value . '</option>';
+			$fields_options .= '<option value="' . $key . '"' . selected( $form_field, $key, false ) . '>' . $value . '</option>';
 		}
 
 		return $fields_options;
