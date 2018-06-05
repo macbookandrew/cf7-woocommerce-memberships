@@ -23,7 +23,7 @@ class CF7_Woo_Memberships {
 	 *
 	 * @var string
 	 */
-	private $version = '1.2.1';
+	private $version = '1.3.0';
 
 	/**
 	 * Data fields

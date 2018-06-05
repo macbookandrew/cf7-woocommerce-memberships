@@ -7,7 +7,7 @@
  * Author URI:      https://andrewrminion.com/
  * Text Domain:     cf7-woo-memberships
  * Domain Path:     /languages
- * Version:         1.2.1
+ * Version:         1.3.0
  *
  * @package         CF7_Woo_Memberships
  */
