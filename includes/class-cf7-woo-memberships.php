@@ -199,6 +199,19 @@ class CF7_Woo_Memberships {
 			$this->get_membership_plans_options()
 		);
 
+		// Add one row for the membership mode.
+		$rows[] = sprintf(
+			'<tr class="cf7-woocommerce-memberships-field-%1$s">
+				<th>
+					<label for="cf7-woocommerce-memberships[%1$s]">%2$s</label><br/>
+				</th>
+					<td><select name="cf7-woocommerce-memberships[%1$s]">%3$s</select></td>
+			</tr>',
+			'membership-mode',
+			'Membership Plan Mode',
+			$this->get_membership_plans_mode()
+		);
+
 		// Add a row for each data field.
 		foreach ( $form_fields as $field ) {
 			$rows[] = sprintf(
@@ -265,6 +278,9 @@ class CF7_Woo_Memberships {
 				if ( ! isset( $form_settings['membership-id'] ) ) {
 					$form_settings['membership-id'] = esc_attr( $_POST['cf7-woocommerce-memberships']['membership-id'] );
 				}
+
+				// Set membership mode.
+				$form_settings['membership-mode'] = esc_attr( $_POST['cf7-woocommerce-memberships']['membership-mode'] );
 			}
 
 			return update_post_meta( $post_id, '_cf7_woo_memberships', maybe_serialize( $form_settings ) );
@@ -295,6 +311,22 @@ class CF7_Woo_Memberships {
 		}
 
 		return $plans_options;
+	}
+
+	/**
+	 * Build <options> list of available membership modes
+	 *
+	 * @since  1.3.0
+	 * @return string HTML <options>
+	 */
+	private function get_membership_plans_mode() {
+		$plan_mode = '';
+		$memberships = new WC_Memberships_User_Memberships();
+		foreach ( $memberships->get_user_membership_statuses() as $key => $value ) {
+			$plan_mode .= '<option value="' . $key . '"' . selected( $this->form_settings['membership-mode'], $key, false ) . '>' . $value['label'] . '</option>';
+		}
+
+		return $plan_mode;
 	}
 
 	/**
@@ -354,15 +386,37 @@ class CF7_Woo_Memberships {
 				'user_id' => $user_id,
 			);
 
-			$existing_membership = wc_memberships_get_user_membership( $membership_data['user_id'], $membership_data['plan_id'] );
-
 			// Check for an existing membership.
+			$existing_membership = wc_memberships_get_user_membership( $membership_data['user_id'], $membership_data['plan_id'] );
 			if ( isset( $existing_membership->id ) ) {
 				return true;
 			} else {
+				// Set the membership status.
+				add_filter( 'wc_memberships_new_membership_data', array( $this, 'set_membership_status' ) );
+
 				return wc_memberships_create_user_membership( $membership_data );
 			}
 		}
+	}
+
+	/**
+	 * Set new membership status.
+	 *
+	 * @param  array $new_membership_data WP post arguments.
+	 * @return array Modified post arguments.
+	 * @since  1.3.0
+	 */
+	public function set_membership_status( array $new_membership_data ) {
+		// Get form settings.
+		$submission = WPCF7_Submission::get_instance();
+		if ( $submission ) {
+			$posted_data = $submission->get_posted_data();
+		}
+		$form_settings = $this->get_form_settings( $posted_data['_wpcf7'] );
+
+		// Set membership mode.
+		$new_membership_data['post_status'] = $form_settings['membership-mode'];
+		return $new_membership_data;
 	}
 
 }
