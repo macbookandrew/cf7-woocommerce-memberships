@@ -1,14 +1,16 @@
 # Contact Form 7 → WooCommerce Membership #
-**Contributors:** macbookandrew  
-**Donate link:** https://www.paypal.me/AndrewRMinionDesign  
-**Tags:** comments, spam  
-**Requires at least:** 4.4  
-**Tested up to:** 4.9.5  
-**Stable tag:** 1.3.0  
-**License:** GPLv2 or later  
-**License URI:** https://www.gnu.org/licenses/gpl-2.0.html  
+**Contributors:** macbookandrew
+**Donate link:** https://www.paypal.me/AndrewRMinionDesign
+**Tags:** comments, spam
+**Requires at least:** 4.4
+**Tested up to:** 4.9.5
+**Stable tag:** 1.3.0
+**License:** GPLv2 or later
+**License URI:** https://www.gnu.org/licenses/gpl-2.0.html
 
 Adds Contact Form 7 entries as new users (if necessary) and grants them the specified WooCommerce Membership plan.
+
+Includes support for creating memberships in any available mode: active, pause, complimentary, etc.
 
 ## Description ##
 

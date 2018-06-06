@@ -14,6 +14,8 @@ Adds Contact Form 7 entries as new users (if necessary) and grants them the spec
 
 Adds Contact Form 7 entries as new users (if necessary) and grants them the specified WooCommerce Membership plan.
 
+Includes support for creating memberships in any available mode: active, pause, complimentary, etc.
+
 == Installation ==
 
 1. Upload this plugin to the `/wp-content/plugins/` directory.
